@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  launchd job for a NAMED cloudflared tunnel (stable hostname, survives session death).
+
+  PREFERRED: let cloudflared manage its own launchd job:
+    cloudflared tunnel login
+    cloudflared tunnel create brain
+    # route a hostname you own on Cloudflare to it:
+    cloudflared tunnel route dns brain brain.example.com
+    # config ~/.cloudflared/config.yml ->
+    #   tunnel: brain
+    #   credentials-file: /Users/oni/.cloudflared/<UUID>.json
+    #   ingress:
+    #     - hostname: brain.example.com
+    #       service: http://127.0.0.1:8787   # <- the watchdog
+    #     - service: http_status:404
+    sudo cloudflared service install     # installs + starts a system LaunchDaemon
+
+  This plist is the manual alternative if you'd rather run it as a user agent.
+  Either way the point is: cloudflared is its OWN supervised service, NOT a child of
+  the bridge — so a wedged session can never take the tunnel down again (no more 1033).
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.oni.cloudflared</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/opt/homebrew/bin/cloudflared</string>
+        <string>tunnel</string>
+        <string>run</string>
+        <string>brain</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/oni/.bridge-heal/cloudflared.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/oni/.bridge-heal/cloudflared.err.log</string>
+</dict>
+</plist>

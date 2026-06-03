@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  launchd job for the bridge watchdog.
+  Install:
+    cp com.oni.bridge-watchdog.plist ~/Library/LaunchAgents/
+    # edit the paths + BRIDGE_TOKEN below first
+    launchctl load -w ~/Library/LaunchAgents/com.oni.bridge-watchdog.plist
+
+  KeepAlive=true means launchd restarts the watchdog if it ever exits/crashes,
+  so the control plane is self-healing independently of any session.
+-->
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.oni.bridge-watchdog</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <!-- Use an absolute node path; `which node` on the Mac. e.g. /opt/homebrew/bin/node -->
+        <string>/opt/homebrew/bin/node</string>
+        <string>/Users/oni/bridge-heal/watchdog/watchdog.mjs</string>
+    </array>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>BRIDGE_TOKEN</key>
+        <string>CHANGE-ME-to-a-long-random-secret</string>
+        <key>BRIDGE_PORT</key>
+        <string>8787</string>
+        <key>BRIDGE_STUCK_MINUTES</key>
+        <string>15</string>
+        <!-- set to 1 to auto-restart wedged (not just dead) sessions; off by default -->
+        <key>BRIDGE_AUTO_HEAL_STUCK</key>
+        <string>0</string>
+    </dict>
+
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/Users/oni/.bridge-heal/watchdog.out.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/oni/.bridge-heal/watchdog.err.log</string>
+</dict>
+</plist>
