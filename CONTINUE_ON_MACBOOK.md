@@ -21,8 +21,14 @@ Read `README.md` and `DESIGN.md` for the full picture. Code lives in
 
 - ✅ App code written and **build-verified** (debug APK compiles).
 - ✅ Phone is **rooted with Magisk**.
+- ✅ Two hiding paths implemented: **root** (TTL/HL mangle) and **no-root**
+  (SOCKS5 proxy).
 - ⬜ App not yet installed on the phone.
 - ⬜ Hiding not yet verified against a real tether session.
+
+**Primary plan: the root path** (Steps 1–7 below) — it's more complete. The
+no-root SOCKS5 proxy is a fallback if Step 1's kernel probe fails; see
+"Alternative: no-root proxy" near the end.
 
 ## Important: transport on a Mac
 
@@ -197,6 +203,22 @@ vector; if your carrier still flags it, they're likely using a secondary signal
 | Rules vanish after a while | Expected on connectivity change; the foreground service re-asserts every 5s. Keep the app running, or install the Magisk module (Step 6). |
 | Mac gets no internet over USB | Expected — macOS has no RNDIS driver. Use the Wi-Fi hotspot transport. |
 | Gradle build fails on SDK | `ANDROID_HOME` unset or wrong; ensure platform-34 + build-tools-34 installed and `local.properties` has `sdk.dir`. |
+
+## Alternative: no-root proxy (use if Step 1's kernel probe fails)
+
+No root or no `xt_TTL`/`xt_HL`? Use the built-in SOCKS5 proxy instead — the phone
+re-originates each connection, so traffic leaves at the normal TTL with no
+mangling. Build/install the app the same way (Steps 2–3), then:
+
+1. On the phone: turn on **Wi-Fi hotspot**; connect the MacBook to it.
+2. In the app, scroll to **"No-root mode — SOCKS5 proxy"** → **Start proxy**.
+   It shows the phone's hotspot IP and port (default `8282`).
+3. On the Mac: **System Settings → Network → Wi-Fi → Details → Proxies →**
+   enable **SOCKS Proxy**, server = that IP, port = `8282`.
+4. Verify: the app's connection counter rises as you browse on the Mac.
+
+Limitation: TCP only (no UDP yet), so some DNS/QUIC may still go direct. The
+root path is more complete. (UDP ASSOCIATE is the top roadmap item.)
 
 ## Where to take it next (from `DESIGN.md` roadmap)
 
