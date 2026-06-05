@@ -1,0 +1,6 @@
+id=unitytether
+name=Unity Tether (TTL/HL normalizer)
+version=v0.1.0
+versionCode=1
+author=Unity Tether
+description=Normalizes outgoing IPv4 TTL and IPv6 Hop Limit to 64 so tethered traffic is indistinguishable from the phone's own traffic. Persists across reboots.

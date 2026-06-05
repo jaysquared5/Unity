@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Unity Tether</string>
+
+    <string name="channel_name">Tether hiding status</string>
+    <string name="channel_desc">Shows whether the carrier-hiding layer is active.</string>
+
+    <string name="action_stop">Stop</string>
+
+    <string name="notif_active">Hiding active · TTL=%1$d · %2$s</string>
+    <string name="notif_active_no_iface">Hiding active · TTL=%1$d · waiting for tether</string>
+    <string name="notif_inactive">Hiding stopped.</string>
+    <string name="notif_no_root">Root access was not granted.</string>
+    <string name="notif_unsupported">This kernel does not support TTL/HL rewriting.</string>
+</resources>

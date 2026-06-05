@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Compose draws the UI; this base theme only needs to exist for the
+         manifest and to provide a sane splash/window background. -->
+    <style name="Theme.UnityTether" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

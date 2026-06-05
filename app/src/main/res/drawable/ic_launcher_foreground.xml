@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- A simple shield, centered within the adaptive-icon safe zone. -->
+    <path
+        android:fillColor="#7AD0FF"
+        android:pathData="M54,30 L72,38 L72,56 C72,68 64,76 54,80 C44,76 36,68 36,56 L36,38 Z" />
+    <path
+        android:fillColor="#00344A"
+        android:pathData="M48.5,55 L45,51.5 L42.5,54 L48.5,60 L65,43.5 L62.5,41 Z" />
+</vector>
