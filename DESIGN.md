@@ -73,12 +73,30 @@ MainActivity ──> TetherScreen (Compose UI) ──> TetherViewModel
   `xt_HL` → clear "Not supported" with the kernel reason, instead of silently
   failing.
 
+## No-root path (implemented): SOCKS5 proxy
+
+A `VpnService` TTL rewrite **does not work for tethering**: Android's
+`VpnService` only captures traffic from apps on the phone, not the forwarded
+traffic from a tethered laptop — exactly the packets we need to fix. So the
+no-root path is instead a **local SOCKS5 proxy** (`proxy/Socks5ProxyServer.kt`,
+hosted by `service/ProxyService.kt`):
+
+- The laptop joins the phone's Wi-Fi hotspot and points its SOCKS proxy at the
+  phone.
+- For each connection, the phone opens a **fresh** outbound socket to the
+  destination. Because the phone is the genuine origin, packets leave at its
+  normal TTL/HL (64) — no mangling, no root.
+- Domain names resolve on the phone, so DNS doesn't leak at TTL 63 for
+  SOCKS5-aware clients either.
+
+Trade-offs vs. the root path: covers **TCP** (CONNECT) only — no UDP associate —
+and a few apps that bypass the system SOCKS setting may still send some traffic
+(e.g. DNS) directly. The root TTL rewrite is more complete; the proxy needs no
+root. This is the same approach no-root competitors (NetShare) use.
+
 ## Roadmap
 
-1. **No-root fallback** — an Android `VpnService` that owns the default route
-   and rewrites the TTL/HL of outgoing packets in userspace (a small TUN
-   read → mangle → re-emit loop). Slower and more complex than the kernel path,
-   but works without root. This is how no-root competitors do it.
+1. **UDP support in the proxy** (SOCKS5 UDP ASSOCIATE) to close the DNS/QUIC gap.
 2. **One-tap tether toggling (root)** — best-effort enabling of USB/Wi-Fi/BT
    tethering via shell (`svc usb setFunctions rndis`, `cmd`/`service` calls),
    labeled experimental due to OEM variance.

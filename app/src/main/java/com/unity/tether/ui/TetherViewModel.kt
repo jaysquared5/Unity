@@ -3,13 +3,17 @@ package com.unity.tether.ui
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.unity.tether.HidingStateHolder
+import com.unity.tether.ProxyStateHolder
 import com.unity.tether.net.TtlManager
+import com.unity.tether.service.ProxyService
 import com.unity.tether.service.TetherService
 import kotlinx.coroutines.flow.StateFlow
 
 class TetherViewModel(app: Application) : AndroidViewModel(app) {
 
     val state: StateFlow<com.unity.tether.HidingState> = HidingStateHolder.state
+
+    val proxyState: StateFlow<com.unity.tether.ProxyState> = ProxyStateHolder.state
 
     /** TTL the user wants to normalize to. 64 works for virtually all carriers. */
     var ttl: Int = TtlManager.DEFAULT_TTL
@@ -22,4 +26,10 @@ class TetherViewModel(app: Application) : AndroidViewModel(app) {
     fun start() = TetherService.start(getApplication(), ttl)
 
     fun stop() = TetherService.stop(getApplication())
+
+    // --- No-root SOCKS5 proxy path ---
+
+    fun startProxy() = ProxyService.start(getApplication())
+
+    fun stopProxy() = ProxyService.stop(getApplication())
 }

@@ -12,4 +12,6 @@
     <string name="notif_inactive">Hiding stopped.</string>
     <string name="notif_no_root">Root access was not granted.</string>
     <string name="notif_unsupported">This kernel does not support TTL/HL rewriting.</string>
+
+    <string name="notif_proxy_active">SOCKS5 proxy on :%1$d · %2$d active connection(s)</string>
 </resources>

@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.Shield
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -38,6 +39,7 @@ import com.unity.tether.HidingStatus
 @Composable
 fun TetherScreen(vm: TetherViewModel = viewModel()) {
     val state by vm.state.collectAsStateWithLifecycle()
+    val proxyState by vm.proxyState.collectAsStateWithLifecycle()
 
     Scaffold(
         topBar = { TopAppBar(title = { Text("Unity Tether") }) },
@@ -50,6 +52,11 @@ fun TetherScreen(vm: TetherViewModel = viewModel()) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
+            Text(
+                "Root mode — TTL/HL hiding",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
             StatusCard(state.status, state.detail, state.tetherInterfaces, state.ttl)
 
             val active = state.status == HidingStatus.ACTIVE
@@ -66,6 +73,69 @@ fun TetherScreen(vm: TetherViewModel = viewModel()) {
             }
 
             HowToCard()
+
+            HorizontalDivider(Modifier.padding(vertical = 4.dp))
+
+            Text(
+                "No-root mode — SOCKS5 proxy",
+                style = MaterialTheme.typography.titleSmall,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            ProxyCard(proxyState)
+            if (proxyState.running) {
+                Button(
+                    onClick = { vm.stopProxy() },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Stop proxy") }
+            } else {
+                Button(
+                    onClick = { vm.startProxy() },
+                    modifier = Modifier.fillMaxWidth(),
+                ) { Text("Start proxy") }
+            }
+        }
+    }
+}
+
+@Composable
+private fun ProxyCard(proxy: com.unity.tether.ProxyState) {
+    Card(Modifier.fillMaxWidth()) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    if (proxy.running) Icons.Filled.Shield else Icons.Filled.CheckCircle,
+                    contentDescription = null,
+                    tint = if (proxy.running) Color(0xFF2E7D32) else MaterialTheme.colorScheme.outline,
+                )
+                Spacer(Modifier.width(12.dp))
+                Text(
+                    if (proxy.running) "Proxy running" else "Proxy stopped",
+                    style = MaterialTheme.typography.titleLarge,
+                )
+            }
+
+            if (proxy.running) {
+                val host = proxy.address ?: "your phone's hotspot gateway IP"
+                Text(
+                    "On the MacBook (connected to this phone's Wi-Fi hotspot):\n" +
+                        "System Settings → Network → Wi-Fi → Details → Proxies →\n" +
+                        "enable “SOCKS Proxy”, server = $host, port = ${proxy.port}.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    "Active connections: ${proxy.activeConnections}",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+                Text(
+                    "No root needed — the phone re-originates each connection, so traffic leaves at the normal TTL. Covers TCP; a few apps may still send DNS directly.",
+                    style = MaterialTheme.typography.bodySmall,
+                )
+            } else {
+                Text(
+                    "Use this if your kernel can't do TTL rewriting, or you'd rather not root. Turn on the Wi-Fi hotspot, start the proxy, then point the MacBook's SOCKS proxy at the phone.",
+                    style = MaterialTheme.typography.bodyMedium,
+                )
+            }
         }
     }
 }

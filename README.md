@@ -47,8 +47,12 @@ connectivity changes (radio drops, toggling tethering) can flush them.
   probes for it and reports clearly if yours doesn't.
 - Android 8.0 (API 26) or newer.
 
-A no-root path (Android `VpnService` that rewrites TTL in userspace) is on the
-roadmap — see [DESIGN.md](DESIGN.md).
+**No root? There's a fallback.** A built-in **SOCKS5 proxy** mode (no root, no
+special kernel) achieves the same hiding a different way: the laptop sends its
+traffic to a proxy on the phone, and the phone re-originates each connection so
+packets leave at the normal TTL. Turn on the Wi-Fi hotspot, tap **Start proxy**,
+and point the MacBook's SOCKS proxy at the phone. See [DESIGN.md](DESIGN.md) for
+how it works and its trade-offs (TCP only; the root path is more complete).
 
 ---
 

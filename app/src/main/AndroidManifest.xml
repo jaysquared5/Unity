@@ -38,6 +38,15 @@
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Maintains carrier-hiding firewall rules while tethering is active." />
         </service>
+
+        <service
+            android:name=".service.ProxyService"
+            android:exported="false"
+            android:foregroundServiceType="specialUse">
+            <property
+                android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
+                android:value="Runs a local SOCKS5 proxy so tethered traffic originates from the phone (no-root hiding)." />
+        </service>
     </application>
 
 </manifest>
