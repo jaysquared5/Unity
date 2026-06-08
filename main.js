@@ -1,6 +1,6 @@
 'use strict';
 
-const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require('electron');
+const { app, BrowserWindow, ipcMain, dialog, shell, clipboard, Menu } = require('electron');
 const fs = require('fs');
 const path = require('path');
 const store = require('./src/main/store');
@@ -19,7 +19,7 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.js'),
       contextIsolation: true,
       nodeIntegration: false,
-      sandbox: false
+      sandbox: true
     }
   });
 
@@ -30,6 +30,13 @@ function createWindow() {
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https?:\/\//i.test(url)) shell.openExternal(url);
     return { action: 'deny' };
+  });
+
+  // Defense in depth: the window only ever shows the bundled local page. Block
+  // any in-window navigation; route http(s) attempts out to the browser.
+  mainWindow.webContents.on('will-navigate', (e, url) => {
+    e.preventDefault();
+    if (/^https?:\/\//i.test(url)) shell.openExternal(url);
   });
 
   mainWindow.on('closed', () => {
@@ -74,6 +81,13 @@ ipcMain.handle('shell:openExternal', (_e, url) => {
   }
   return Promise.reject(new Error('Refused to open non-http(s) URL'));
 });
+
+// ---------------------------------------------------------------------------
+// IPC: read plain text from the system clipboard. Lives in the main process so
+// the renderer can stay fully sandboxed (preload needs no Electron modules
+// beyond ipcRenderer/contextBridge).
+// ---------------------------------------------------------------------------
+ipcMain.handle('clipboard:readText', () => clipboard.readText());
 
 // ---------------------------------------------------------------------------
 app.whenReady().then(() => {

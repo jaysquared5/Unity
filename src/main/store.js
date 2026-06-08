@@ -17,17 +17,29 @@ const path = require('path');
 
 const DATA_FILE = path.join(app.getPath('userData'), 'av-readiness-data.json');
 
+// Keys that could pollute Object.prototype if assigned. Rejected everywhere.
+function isUnsafeKey(key) {
+  return key === '__proto__' || key === 'constructor' || key === 'prototype';
+}
+
 let cache = null;
 
 function load() {
   if (cache !== null) return cache;
+  // Null-prototype object: assigning a key literally named "__proto__" creates
+  // an own property instead of mutating the prototype chain.
+  cache = Object.create(null);
   try {
     const raw = fs.readFileSync(DATA_FILE, 'utf8');
-    cache = JSON.parse(raw);
-    if (typeof cache !== 'object' || cache === null) cache = {};
+    const parsed = JSON.parse(raw);
+    if (parsed && typeof parsed === 'object') {
+      for (const k of Object.keys(parsed)) {
+        if (isUnsafeKey(k)) continue;
+        cache[k] = parsed[k];
+      }
+    }
   } catch (err) {
-    // Missing file or unreadable/corrupt JSON — start fresh.
-    cache = {};
+    // Missing file or unreadable/corrupt JSON — start fresh (cache already {}).
   }
   return cache;
 }
@@ -49,6 +61,7 @@ module.exports = {
   },
 
   set(key, value) {
+    if (isUnsafeKey(key)) return false;
     const data = load();
     data[key] = value;
     persist();
@@ -56,6 +69,7 @@ module.exports = {
   },
 
   remove(key) {
+    if (isUnsafeKey(key)) return false;
     const data = load();
     delete data[key];
     persist();

@@ -1,6 +1,6 @@
 'use strict';
 
-const { contextBridge, ipcRenderer, clipboard } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 
 // Bridge exposed to the renderer as `window.avAPI`.
 // The renderer never touches Node or Electron internals directly — everything
@@ -27,7 +27,6 @@ contextBridge.exposeInMainWorld('avAPI', {
   openExternal: (url) => ipcRenderer.invoke('shell:openExternal', url),
 
   // Read plain text from the system clipboard (used by the ticket-# paste
-  // helper). Synchronous in Electron's main world, wrapped as a promise so the
-  // renderer can `await` it exactly as it did navigator.clipboard.readText().
-  readClipboard: () => clipboard.readText()
+  // helper). Routed through the main process so the renderer stays sandboxed.
+  readClipboard: () => ipcRenderer.invoke('clipboard:readText')
 });

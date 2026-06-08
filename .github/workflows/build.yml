@@ -13,6 +13,11 @@ on:
     paths-ignore:
       - '**/*.md'
 
+# Least-privilege: the build only needs to read the repo. Artifacts are
+# uploaded via the actions API, which does not require write contents scope.
+permissions:
+  contents: read
+
 jobs:
   build:
     strategy:
@@ -34,7 +39,7 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
 
       - name: Build (${{ matrix.platform }})
         run: npm run dist:${{ matrix.platform }}

@@ -417,7 +417,14 @@ function loadAudit() { try { return JSON.parse(LS.getItem(AUDIT_KEY)) || []; } c
 function saveAudit(rows) { try { LS.setItem(AUDIT_KEY, JSON.stringify(rows)); } catch {} }
 function exportCSV(allRows) {
   const cols = ['timestamp_iso','agent_slug','agent_label','date','day_of_week','iso_week','cadence','domain','room','title','action','status','note','ticket'];
-  const esc = c => { const s = (c == null) ? '' : String(c); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s; };
+  const esc = c => {
+    let s = (c == null) ? '' : String(c);
+    // Neutralize spreadsheet formula injection: a cell beginning with one of
+    // these characters is executed as a formula by Excel/Sheets. Prefix with a
+    // single quote so it imports as literal text. (OWASP CSV-injection guidance.)
+    if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;
+    return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g,'""') + '"' : s;
+  };
   const lines = [cols.join(',')];
   for (const r of allRows) lines.push(cols.map(c => esc(r[c])).join(','));
   return lines.join('\r\n') + '\r\n';
