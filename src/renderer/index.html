@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>NYC Daily Checklist</title>
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header>
+  <div class="h-left">
+    <select id="agent-select" title="Who is filling this out?"></select>
+  </div>
+  <h1>📋 NYC Daily Checklist</h1>
+  <div class="h-right">
+    <span class="pill warn" id="date-pill">—</span>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<div class="footer">
+  <div class="progress">
+    <div class="progress-labels">
+      <span class="rooms-done" id="rooms-done">0 of 0 rooms completed</span>
+      <span class="tests-done" id="pt">0 / 0 tests</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="pf" style="width:0%"></div></div>
+  </div>
+  <button class="btn ghost tiny" id="reset-btn" title="Clear today's session">Reset</button>
+  <button class="btn ghost tiny" id="csv-btn" title="Download the full cumulative CSV audit log (every day, every agent)">📊 CSV</button>
+  <button class="btn primary" id="save-btn" disabled title="Saves today's results and downloads a polished daily HTML report. (On mobile, only the report downloads — use 📊 separately for the CSV.)">📄 Save &amp; generate report</button>
+</div>
+
+<div id="toast"></div>
+
+<script src="renderer.js"></script>
+</body>
+</html>

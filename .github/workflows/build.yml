@@ -1,0 +1,54 @@
+name: Build
+
+# Builds unsigned Mac (.dmg/.zip, arm64) and Windows (.exe/.zip, x64) artifacts.
+# Triggered manually or on push to the working branch. Artifacts are attached to
+# the run; download them and right-click → Open (Mac) / "More info → Run anyway"
+# (Windows) since they are intentionally unsigned.
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - claude/**
+    paths-ignore:
+      - '**/*.md'
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-latest
+            platform: mac
+          - os: windows-latest
+            platform: win
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build (${{ matrix.platform }})
+        run: npm run dist:${{ matrix.platform }}
+        env:
+          # Unsigned, internal-only builds — disable any auto code-signing.
+          CSC_IDENTITY_AUTO_DISCOVERY: false
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: av-readiness-${{ matrix.platform }}
+          path: |
+            dist/*.dmg
+            dist/*.exe
+            dist/*.zip
+          if-no-files-found: warn
